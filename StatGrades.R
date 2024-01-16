@@ -1,16 +1,19 @@
-setwd("/Users/adelaidegilley/Desktop/MBB/Grades")
 library(readr)
 library(dplyr)
 
-data <- read_csv("Feb25Game.csv")
+#import game statistics 
+data <- read_csv("Game.csv")
 data <- as.data.frame(data) 
 data[data == "null"] <- 0
+
+# Convert selected columns to numeric
 columns_to_convert <- c("PTS", "PPP", "FG.", "STLBLK", "EFG.", "SSQ", "PPS", "3FG.", "FT.")
 for (col in columns_to_convert) {
   data[[col]][!grepl("^\\d+(\\.\\d+)?$", data[[col]])] <- NA
   data[[col]] <- ifelse(data[[col]] == "DNP", "DNP", as.numeric(data[[col]]))
 }
 
+# Define your own weights for overall game stats and position-specific categories
 weights <- c(
   PTS = 0.1,
   PPP = 0.125,
@@ -58,6 +61,8 @@ pos_weights <- list(
     FT. = 0.1
   )
 )
+
+# Function to calculate grades based on a scale
 calculate_grade <- function(value, scale) {
   if (is.na(value) || any(is.na(scale)) || any(is.na(scale[value >= scale]))) {
     return("")
@@ -76,6 +81,7 @@ calculate_grade <- function(value, scale) {
   }
 }
 
+# Define scale for each statistic
 scale <- list(
   PTS = c(A = 20, B = 15, C = 8, D = 3, F = 0),
   PPP = c(A = 1.2, B = 1, C = 0.8, D = 0.4, F = 0),
@@ -88,6 +94,7 @@ scale <- list(
   FT. = c(A = 0.8, B = 0.6, C = 0.4, D = 0.2, F = 0)
 )
 
+# Loop through data to calculate and store grades
 for (player in 1:nrow(data)) {
   position <- data$POS[player]
   for (stat in names(weights)) {
@@ -104,7 +111,7 @@ for (player in 1:nrow(data)) {
 }
 
 
-#install.packages("openxlsx")
+# Write the processed data to an Excel file
 library(openxlsx)
-write.xlsx(data,file = '/Users/adelaidegilley/Desktop/MBB/Grades/new_file4.xlsx')
+write.xlsx(data,file = '/Users/....new_file4.xlsx')
 
